@@ -1,0 +1,16 @@
+<html>
+	<body>
+	<a href="./new_user">Sign up for Judgemental Eye</a>
+	<form action="./login"> 
+		<label for="email">Email</label>
+		<input type="text" name="email"/>
+		<label for="password">Password</label>
+		<input type="text" name="password"/>
+		<input type="submit">
+		</form>
+	<h1>List of Current Users</h1>
+	{% for user in users %}
+	<h2>User {{ user.id }}, age {{ user.age }} has {{ user.ratings|length }} ratings</h2>
+	{% endfor %}
+	</body>
+</html>

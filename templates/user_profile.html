@@ -1,0 +1,13 @@
+<html>
+	<body>
+	<h1>User Profile</h1>
+	<p>Email address: {{ current_user.email }}</p>
+	<p>Zip code: {{ current_user.zipcode }}</p>
+	<p>Age: {{ current_user.age }}</p>
+	<p>Gender: {{current_user.gender}}</p>
+	<p>Occupation: {{ current_user.occupation}}</p>
+	{% for user in users %}
+	<h2>User {{ user.id }}, age {{ user.age }} has {{ user.ratings|length }} ratings</h2>
+	{% endfor %}
+	</body>
+</html>
