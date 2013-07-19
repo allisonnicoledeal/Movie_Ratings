@@ -1,0 +1,33 @@
+<html>
+    <body>
+    <h1>Movie Information</h1>
+    <p>Title: {{movie.movie_title}}</p>
+    <p>Release date: {{movie.release_date}}</p>
+    <p>Your rating: 
+
+    <form action="/rate_movie">
+    <input type="hidden" name="movie_id" value="{{movie.movie_id}}"/>
+    <select name="value">
+        {% for value in values %}
+            {% if value == rating_value %} 
+                <option value="{{value}}" selected="selected">
+                    {{value}}
+                </option>
+            {% else %}
+                <option value="{{value}}">
+                    {{value}} 
+                </option>  
+            {% endif %}
+        {% endfor %}
+    </select>
+       
+       <input type="submit" value= "Rate Movie"/>
+   </form>
+
+
+    {% for rating in movie.ratings %}</p>
+    <p>Rater: <a href="/user_profile?id={{rating.user_id}}">{{rating.user_id}}</a><br/>
+    Rating: {{rating.movie_rating}}   </p>
+    {% endfor %}
+    </body>
+</html>
