@@ -14,7 +14,7 @@ def load_users(session):
 
 def load_movies(session):
     # use u.item
-    with open('./seed_data/u.item_test') as csvfile:
+    with open('./seed_data/u.item') as csvfile:
         moviereader = csv.reader(csvfile, delimiter="|")
         for row in moviereader:
             if row[1] != "unknown":
@@ -40,7 +40,7 @@ def load_ratings(session):
 
 def main(session):
     # You'll call each of the load_* functions with the session as an argument
-    #load_users(session)
+    load_users(session)
     load_movies(session)
     load_ratings(session)
 

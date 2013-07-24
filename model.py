@@ -1,11 +1,15 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, create_engine, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
+import correlation
 
 engine = create_engine("sqlite:///ratings.db", echo=False)
 session = scoped_session(sessionmaker(bind=engine,
                                       autocommit=False,
                                       autoflush = False))
+
+
+
 
 Base = declarative_base()
 Base.query = session.query_property()
@@ -21,8 +25,52 @@ class User(Base):
     zipcode = Column(String(15), nullable=True)
     gender = Column(String(1), nullable=True)
     occupation = Column(String(32), nullable=True)
+    # ratings
 
-    movie_ratings = relationship("Rating", backref=backref("users"))
+    def similarity(self, other_user):
+        d = {}
+        rating_pairs = []
+        for self_rating in self.ratings:
+            d[self_rating.movie_id] = self_rating.movie_rating
+
+        for other_user_rating in other_user.ratings:
+            if (other_user_rating.movie_id in d) == True:
+                rating_pairs.append((other_user_rating.movie_rating, d.get(other_user_rating.movie_id)))
+        if rating_pairs:
+            return correlation.pearson(rating_pairs)
+        else:
+            return 0.0
+
+    def make_prediction(self, movie_id):
+        ratings = self.ratings
+        other_ratings = session.query(Rating).filter_by(movie_id=movie_id).all()
+        other_users = []
+        
+        other_u_rating = []
+
+        for r in other_ratings:
+            other_users.append(r.rater)
+            other_u_rating.append(r.movie_rating)
+
+        correlation_tuples = []
+
+        for i in range(len(other_users)):
+            sim = self.similarity(other_users[i])
+            rating = other_u_rating[i]
+            correlation_tuples.append((sim, rating))
+
+        #s = sorted(correlation_tuples, key=lambda i: i[1], reverse=True)
+        numerator = sum([rating * sim for sim, rating in correlation_tuples])
+        denominator = sum([correlation_tuples[0] for correlation_tuple in correlation_tuples])
+        return numerator/denominator
+
+        # best_match_tuple = s[0]     
+        # best_match_id = best_match_tuple[0]
+        # coefficient = best_match_tuple[1]
+        # best_match_rating = session.query(Rating).filter_by(user_id=best_match_id, movie_id=movie_id).one()
+        
+        # return coefficient * best_match_rating.movie_rating
+
 
 class Rating(Base):
     __tablename__ = "ratings"
@@ -34,6 +82,8 @@ class Rating(Base):
 
     rater = relationship("User", backref=backref("ratings", order_by=id))
 
+    # movie
+
 
 class Movie(Base):
     __tablename__ = "movies"
@@ -44,7 +94,7 @@ class Movie(Base):
     release_date = Column(DateTime, nullable=True)
 
     # use rating class as association object
-    ratings = relationship("Rating", backref="movies")
+    ratings = relationship("Rating", backref="movie")
 
 
 
